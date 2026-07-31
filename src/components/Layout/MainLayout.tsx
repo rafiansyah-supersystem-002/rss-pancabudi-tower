@@ -23,7 +23,10 @@ type Props = {
 export default function MainLayout({ children, isDark, setIsDark }: Props) {
     const pathname = usePathname() || "/";
     const router = useRouter();
-    const user = "Jerry";
+const user = {
+  firstName: "Jerry",
+  lastName :"Tom"
+};
     const screens = useBreakpoint();
     const [collapsed, setCollapsed] = useState(false);
     const [hasClicked, setHasClicked] = useState(false);

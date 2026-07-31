@@ -25,6 +25,12 @@ export default function ClientConditionalLayout({
         pathname.startsWith(route),
     );
 
+    const isDark = false;
+
+    const setIsDark = (_value: boolean) => {
+        // no-op
+    };
+
     return (
         <ConfigProvider theme={currentTheme}>
             <AntdApp>
@@ -38,7 +44,7 @@ export default function ClientConditionalLayout({
                             animate={{ opacity: 1, filter: "blur(0px)" }}
                             transition={{ duration: 0.65, ease: "easeOut" }}
                         >
-                            <MainLayout>
+                            <MainLayout isDark={isDark} setIsDark={setIsDark}>
                                 {children}
                             </MainLayout>
                         </motion.div>
