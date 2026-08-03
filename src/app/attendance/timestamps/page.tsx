@@ -14,23 +14,31 @@ import {
     Input,
     Spin,
     Tabs,
+    Tag,
+    Avatar,
 } from "antd";
-import { UploadOutlined, CameraOutlined } from "@ant-design/icons";
+import {
+    UploadOutlined,
+    CameraOutlined,
+    LogoutOutlined,
+    LoginOutlined,
+    UserOutlined,
+} from "@ant-design/icons";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import axios from "axios";
 
 const { Title, Text } = Typography;
 
-interface Employee {
+interface Security {
     id: string;
     name: string;
-    department: string;
+    shift: string;
     position: string;
 }
 
 interface Attendance {
     id: string;
-    employeeId: string;
+    securityId: string;
     date: string;
     checkIn: string;
     checkOut: string;
@@ -46,17 +54,25 @@ interface Checkpoint {
 interface Visit {
     id: string;
     attendanceId: string;
-    employeeId: string;
+    securityId: string;
     checkpointId: string;
     visitTime: string;
     evidence: string;
 }
 
+interface OfficeHours {
+    startHours: string;
+    maxStartHours: string;
+    finishHours: string;
+    maxFinishHours: string;
+}
+
 export default function AttendancePage() {
-    const [employees, setEmployees] = useState<Employee[]>([]);
-    const [employeesSelect, setEmployeesSelect] = useState<Employee[]>([]);
+    const [security, setSecurity] = useState<Security[]>([]);
+    const [securitySelect, setSecuritySelect] = useState<Security[]>([]);
     const [attendance, setAttendance] = useState<Attendance[]>([]);
-    const [employeeId, setEmployeeId] = useState<string>();
+    const [securityId, setEmployeeId] = useState<string>();
+    const [officeHours, setOfficeHours] = useState<OfficeHours[]>([]);
     const [photo, setPhoto] = useState<File | null>(null);
     const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
     const [selectedCheckpoint, setSelectedCheckpoint] = useState<string>();
@@ -78,14 +94,14 @@ export default function AttendancePage() {
         useState<Checkpoint | null>(null);
     const [checkpointPhoto, setCheckpointPhoto] = useState<File>();
 
-    async function loadEmployees() {
+    async function loadSecurity() {
         const res = await axios.get("/api/attendance/members");
 
-        setEmployees(res.data);
+        setSecurity(res.data);
 
-        setEmployeesSelect(
+        setSecuritySelect(
             res.data.map((e: any) => ({
-                label: `${e.id} - ${e.name} - ${e.department}`,
+                label: `${e.id} - ${e.name} - ${e.shift}`,
                 value: e.id,
             })),
         );
@@ -96,18 +112,28 @@ export default function AttendancePage() {
         setAttendance(res.data);
     }
 
+    const loadOfficeHours = async () => {
+        try {
+            const res = await axios.get("/api/attendance/officehours");
+            setOfficeHours(res.data);
+        } catch {
+            message.error("Failed to load office hours");
+        }
+    };
+
     useEffect(() => {
-        loadEmployees();
+        loadSecurity();
         loadAttendance();
         loadCheckpoints();
         loadVisits();
+        loadOfficeHours();
     }, []);
 
     async function checkIn() {
-        if (!employeeId) {
+        if (!securityId) {
             Modal.warning({
-                title: "Employee Required",
-                content: "Please select an employee.",
+                title: "Security Required",
+                content: "Please select an security.",
             });
             return;
         }
@@ -126,7 +152,7 @@ export default function AttendancePage() {
             // Step 1: Upload photo
             const formData = new FormData();
             formData.append("photo", photo);
-            formData.append("employeeId", employeeId);
+            formData.append("securityId", securityId);
 
             const uploadRes = await axios.post(
                 "/api/attendance/evidence",
@@ -142,7 +168,7 @@ export default function AttendancePage() {
 
             // Step 2: Save attendance
             await axios.post("/api/attendance/timestamps", {
-                employeeId,
+                securityId,
                 type: "checkin",
                 photoId,
             });
@@ -166,8 +192,8 @@ export default function AttendancePage() {
     }
 
     async function checkOut() {
-        if (!employeeId) {
-            message.warning("Select employee");
+        if (!securityId) {
+            message.warning("Select security");
             return;
         }
 
@@ -175,7 +201,7 @@ export default function AttendancePage() {
 
         try {
             await axios.post("/api/attendance/timestamps", {
-                employeeId,
+                securityId,
                 type: "checkout",
             });
 
@@ -201,10 +227,10 @@ export default function AttendancePage() {
     }
 
     function onVisit(checkpointId: string) {
-        if (!employeeId) {
+        if (!securityId) {
             Modal.warning({
-                title: "Employee Required",
-                content: "Please select an employee first.",
+                title: "Security Required",
+                content: "Please select an security first.",
             });
 
             return;
@@ -216,10 +242,10 @@ export default function AttendancePage() {
     }
 
     async function uploadVisit(checkpointId: string, file?: File) {
-        if (!employeeId) {
+        if (!securityId) {
             Modal.warning({
-                title: "Employee Required",
-                content: "Please select an employee.",
+                title: "Security Required",
+                content: "Please select an security.",
             });
             return;
         }
@@ -238,7 +264,7 @@ export default function AttendancePage() {
             const formData = new FormData();
 
             formData.append("photo", file);
-            formData.append("employeeId", employeeId);
+            formData.append("securityId", securityId);
 
             const upload = await axios.post(
                 "/api/attendance/evidence",
@@ -251,7 +277,7 @@ export default function AttendancePage() {
             );
 
             await axios.post("/api/attendance/visits", {
-                employeeId,
+                securityId,
                 checkpointId,
                 evidence: upload.data.url,
             });
@@ -377,12 +403,16 @@ export default function AttendancePage() {
                         key: "1",
                         label: (
                             <span style={{ fontSize: 12, fontWeight: 500 }}>
-                                Employees
+                                Security
                             </span>
                         ),
                         children: (
                             <>
-                                {" "}
+                            <Text>
+    {officeHours.length > 0
+        ? `${officeHours[0].startHours} - ${officeHours[0].finishHours}`
+        : "Loading..."}
+</Text>
                                 <Card
                                     title={
                                         <span
@@ -407,8 +437,8 @@ export default function AttendancePage() {
                                     >
                                         <Select
                                             style={{ width: "100%" }}
-                                            placeholder="Select Employee"
-                                            options={employeesSelect}
+                                            placeholder="Select Security"
+                                            options={securitySelect}
                                             onChange={setEmployeeId}
                                         />
 
@@ -473,6 +503,385 @@ export default function AttendancePage() {
                                                 : "Choose Photo"}
                                         </label>
                                     </Space>
+                                    <Card
+                                        title={
+                                            <span
+                                                style={{
+                                                    fontSize: "14px",
+                                                    fontWeight: 600,
+                                                }}
+                                            >
+                                                Attendance History
+                                            </span>
+                                        }
+                                        styles={{
+                                            body: {
+                                                padding: 10,
+                                            },
+                                        }}
+                                        style={{ marginTop: 24 }}
+                                    >
+                                        <Table
+                                            rowKey="id"
+                                            scroll={{ x: "max-content" }}
+                                            columns={[
+                                                {
+                                                    title: "Security",
+                                                    render: (_, row) =>
+                                                        security.find(
+                                                            (e) =>
+                                                                e.id ===
+                                                                row.securityId,
+                                                        )?.name,
+                                                },
+                                                {
+                                                    title: "Date",
+                                                    dataIndex: "date",
+                                                },
+                                                {
+                                                    title: "Check In",
+                                                    dataIndex: "checkIn",
+                                                },
+                                                {
+                                                    title: "Check Out",
+                                                    dataIndex: "checkOut",
+                                                },
+                                                {
+                                                    title: "Status",
+                                                    dataIndex: "status",
+                                                },
+                                            ]}
+                                            dataSource={attendance}
+                                        />
+                                    </Card>
+                                    <Card
+                                        title={
+                                            <span
+                                                style={{
+                                                    fontSize: "14px",
+                                                    fontWeight: 600,
+                                                }}
+                                            >
+                                                Visit History
+                                            </span>
+                                        }
+                                        styles={{
+                                            body: {
+                                                padding: 10,
+                                            },
+                                        }}
+                                        style={{ marginTop: 24 }}
+                                    >
+                                        <Table
+                                            rowKey="id"
+                                            scroll={{ x: "max-content" }}
+                                            dataSource={visits}
+                                            pagination={{ pageSize: 10 }}
+                                            columns={[
+                                                {
+                                                    title: "Security",
+                                                    render: (_, row) =>
+                                                        security.find(
+                                                            (e) =>
+                                                                e.id ===
+                                                                row.securityId,
+                                                        )?.name,
+                                                },
+                                                {
+                                                    title: "Checkpoint",
+                                                    render: (_, row) =>
+                                                        checkpoints.find(
+                                                            (c: any) =>
+                                                                c.id ===
+                                                                row.checkpointId,
+                                                        )?.name,
+                                                },
+                                                {
+                                                    title: "Visit Time",
+                                                    dataIndex: "visitTime",
+                                                },
+                                                {
+                                                    title: "Evidence",
+                                                    render: (_, row) => (
+                                                        <a
+                                                            href={row.evidence}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                        >
+                                                            View Photo
+                                                        </a>
+                                                    ),
+                                                },
+                                            ]}
+                                        />
+                                    </Card>
+                                    <Card
+                                        title={
+                                            <span
+                                                style={{
+                                                    fontSize: 14,
+                                                    fontWeight: 600,
+                                                }}
+                                            >
+                                                Attendance History
+                                            </span>
+                                        }
+                                        styles={{
+                                            body: {
+                                                padding: 16,
+                                            },
+                                        }}
+                                        style={{ marginTop: 24 }}
+                                    >
+                                        <Space
+                                            direction="vertical"
+                                            size={16}
+                                            style={{ width: "100%" }}
+                                        >
+                                            {attendance.map((item) => {
+                                                const securityData =
+                                                    security.find(
+                                                        (e) =>
+                                                            e.id ===
+                                                            item.securityId,
+                                                    );
+
+                                                // Match visit history by security + same date
+                                                const matchedVisits =
+                                                    visits.filter((visit) => {
+                                                        const attendanceDate =
+                                                            item.date.split(
+                                                                " ",
+                                                            )[0];
+                                                        const visitDate =
+                                                            visit.visitTime.split(
+                                                                " ",
+                                                            )[0];
+
+                                                        return (
+                                                            visit.securityId ===
+                                                                item.securityId &&
+                                                            attendanceDate ===
+                                                                visitDate
+                                                        );
+                                                    });
+
+                                                return (
+                                                    <Card
+                                                        key={item.id}
+                                                        hoverable
+                                                        style={{
+                                                            borderRadius: 16,
+                                                            boxShadow:
+                                                                "0 8px 24px rgba(0,0,0,0.08)",
+                                                        }}
+                                                        styles={{
+                                                            body: {
+                                                                padding: 20,
+                                                            },
+                                                        }}
+                                                    >
+                                                        <Space
+                                                            align="start"
+                                                            style={{
+                                                                width: "100%",
+                                                            }}
+                                                        >
+                                                            <Avatar
+                                                                size={64}
+                                                                icon={
+                                                                    <UserOutlined />
+                                                                }
+                                                            />
+
+                                                            <div
+                                                                style={{
+                                                                    flex: 1,
+                                                                }}
+                                                            >
+                                                                <Typography.Title
+                                                                    level={5}
+                                                                    style={{
+                                                                        margin: 0,
+                                                                    }}
+                                                                >
+                                                                    {securityData?.name ??
+                                                                        "Unknown Security"}
+                                                                </Typography.Title>
+
+                                                                <Typography.Text type="secondary">
+                                                                    {item.date}
+                                                                </Typography.Text>
+
+                                                                {/* Check In / Out */}
+                                                                <Space
+                                                                    wrap
+                                                                    size={8}
+                                                                    style={{
+                                                                        marginTop: 16,
+                                                                    }}
+                                                                >
+                                                                    <Tag
+                                                                        icon={
+                                                                            <LoginOutlined />
+                                                                        }
+                                                                        color="green"
+                                                                        style={{
+                                                                            padding:
+                                                                                "6px 12px",
+                                                                            borderRadius: 20,
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            item.checkIn
+                                                                        }
+                                                                    </Tag>
+
+                                                                    <Tag
+                                                                        icon={
+                                                                            <LogoutOutlined />
+                                                                        }
+                                                                        color="red"
+                                                                        style={{
+                                                                            padding:
+                                                                                "6px 12px",
+                                                                            borderRadius: 20,
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            item.checkOut
+                                                                        }
+                                                                    </Tag>
+                                                                </Space>
+
+                                                                {/* Status */}
+                                                                <div
+                                                                    style={{
+                                                                        marginTop: 12,
+                                                                    }}
+                                                                >
+                                                                    <Tag
+                                                                        color={
+                                                                            item.status ===
+                                                                            "Present"
+                                                                                ? "success"
+                                                                                : item.status ===
+                                                                                    "Late"
+                                                                                  ? "warning"
+                                                                                  : "error"
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            item.status
+                                                                        }
+                                                                    </Tag>
+                                                                </div>
+
+                                                                {/* Checkpoints */}
+                                                                <div
+                                                                    style={{
+                                                                        marginTop: 18,
+                                                                    }}
+                                                                >
+                                                                    <Typography.Text
+                                                                        strong
+                                                                    >
+                                                                        Checkpoints
+                                                                    </Typography.Text>
+
+                                                                    <Space
+                                                                        direction="vertical"
+                                                                        style={{
+                                                                            width: "100%",
+                                                                            marginTop: 8,
+                                                                        }}
+                                                                        size={6}
+                                                                    >
+                                                                        {matchedVisits.length >
+                                                                        0 ? (
+                                                                            matchedVisits.map(
+                                                                                (
+                                                                                    visit,
+                                                                                ) => {
+                                                                                    const checkpoint =
+                                                                                        checkpoints.find(
+                                                                                            (
+                                                                                                c: any,
+                                                                                            ) =>
+                                                                                                c.id ===
+                                                                                                visit.checkpointId,
+                                                                                        );
+
+                                                                                    return (
+                                                                                        <Card
+                                                                                            key={
+                                                                                                visit.id
+                                                                                            }
+                                                                                            size="small"
+                                                                                            style={{
+                                                                                                borderRadius: 10,
+                                                                                            }}
+                                                                                        >
+                                                                                            <Space
+                                                                                                style={{
+                                                                                                    width: "100%",
+                                                                                                    justifyContent:
+                                                                                                        "space-between",
+                                                                                                }}
+                                                                                            >
+                                                                                                <div>
+                                                                                                    <Typography.Text
+                                                                                                        strong
+                                                                                                    >
+                                                                                                        {checkpoint?.name ??
+                                                                                                            "Unknown Checkpoint"}
+                                                                                                    </Typography.Text>
+
+                                                                                                    <br />
+
+                                                                                                    <Typography.Text
+                                                                                                        type="secondary"
+                                                                                                        style={{
+                                                                                                            fontSize: 12,
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        {
+                                                                                                            visit.visitTime
+                                                                                                        }
+                                                                                                    </Typography.Text>
+                                                                                                </div>
+
+                                                                                                <a
+                                                                                                    href={
+                                                                                                        visit.evidence
+                                                                                                    }
+                                                                                                    target="_blank"
+                                                                                                    rel="noreferrer"
+                                                                                                >
+                                                                                                    View
+                                                                                                    Photo
+                                                                                                </a>
+                                                                                            </Space>
+                                                                                        </Card>
+                                                                                    );
+                                                                                },
+                                                                            )
+                                                                        ) : (
+                                                                            <Typography.Text type="secondary">
+                                                                                No
+                                                                                checkpoints
+                                                                                visited.
+                                                                            </Typography.Text>
+                                                                        )}
+                                                                    </Space>
+                                                                </div>
+                                                            </div>
+                                                        </Space>
+                                                    </Card>
+                                                );
+                                            })}
+                                        </Space>
+                                    </Card>
                                 </Card>
                             </>
                         ),
@@ -655,9 +1064,9 @@ export default function AttendancePage() {
                                                 width: "100%",
                                                 marginTop: 12,
                                             }}
-                                            placeholder="Select Employee"
-                                            value={employeeId}
-                                            options={employeesSelect}
+                                            placeholder="Select Security"
+                                            value={securityId}
+                                            options={securitySelect}
                                             onChange={setEmployeeId}
                                         />
 
@@ -799,12 +1208,12 @@ export default function AttendancePage() {
                                         scroll={{ x: "max-content" }}
                                         columns={[
                                             {
-                                                title: "Employee",
+                                                title: "Security",
                                                 render: (_, row) =>
-                                                    employees.find(
+                                                    security.find(
                                                         (e) =>
                                                             e.id ===
-                                                            row.employeeId,
+                                                            row.securityId,
                                                     )?.name,
                                             },
                                             {
@@ -852,12 +1261,12 @@ export default function AttendancePage() {
                                         pagination={{ pageSize: 10 }}
                                         columns={[
                                             {
-                                                title: "Employee",
+                                                title: "Security",
                                                 render: (_, row) =>
-                                                    employees.find(
+                                                    security.find(
                                                         (e) =>
                                                             e.id ===
-                                                            row.employeeId,
+                                                            row.securityId,
                                                     )?.name,
                                             },
                                             {

@@ -21,6 +21,7 @@ import {
     LockOutlined,
     DeploymentUnitOutlined,
     ScanOutlined,
+    IdcardOutlined,
 } from "@ant-design/icons";
 import { motion, Variants } from "framer-motion";
 import type { ColumnsType } from "antd/es/table";
@@ -52,8 +53,8 @@ interface DashboardData {
 const MainLayout: React.FC = () => {
     // Sample data for the table
     const screens = useBreakpoint();
-    const firstName = "Mahesa"
-    const lastName = "Mahesa"
+    const firstName = "Mahesa";
+    const lastName = "Mahesa";
 
     const greetingText = useMemo(() => {
         const pick =
@@ -86,87 +87,6 @@ const MainLayout: React.FC = () => {
 
     return (
         <>
-            <Row gutter={[24, 24]} style={{ marginBottom: 16 }}>
-                <Col span={24}>
-                    <Card
-                        hoverable
-                        style={{
-                            position: "relative",
-                            borderRadius: 14,
-                            overflow: "hidden",
-                            background: 
-                                "linear-gradient(135deg, #D9EEF6 0%, #F0F8FB 55%, #FBE9E3 100%)",
-
-                            boxShadow: "0 6px 16px rgba(31, 79, 102, 0.18)",
-
-                            color: "#fff",
-                        }}
-                        styles={{
-                            body: {
-                                padding: "16px",
-                                height: screens.xs ? 130 : 230,
-                                minHeight: screens.xs ? "auto" : 100,
-                            },
-                        }}
-                    >
-                                       {/* Background Image Layer */}
-                        <div
-                            style={{
-                                position: "absolute",
-                                inset: 0,
-                                zIndex: 0,
-                            }}
-                        >
-                            <Image
-                                src={
-                                   "/assets/images/dashboard/illus-light.png"
-                                }
-                                alt="bg"
-                                fill
-                                priority
-                                style={{
-        objectFit: "contain",
-        objectPosition: "right",
-    }}
-                            />
-                        </div>
-
-                        {/* Content */}
-                        <div
-                            style={{
-                                position: "relative",
-                                zIndex: 1,
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: screens.xs ? 4 : 6,
-                            }}
-                        >
-                            <GradualSpacing
-                                text={greetingText}
-                                style={{
-                                    fontSize: screens.xs ? 16 : 20,
-                                    fontWeight: 600,
-                                    letterSpacing: -3.8,
-                                    opacity: 0.8,
-                                    color: "#3AA4CA",
-                                }}
-                            />
-
-                            <StaggeredFade
-                                text={subtitleText}
-                                style={{
-                                    fontSize: screens.xs ? 10 : 15,
-                                    lineHeight: 1.4,
-                                    opacity: 0.9,
-                                    maxWidth: "50%",
-                                                           color: "#3AA4CA",
-                                    textAlign: "left",
-                                }}
-                            />
-                        </div>
-                    </Card>
-                </Col>
-            </Row>
             <div
                 style={{
                     padding: "4px 10px",
@@ -178,7 +98,7 @@ const MainLayout: React.FC = () => {
                 <Title
                     style={{
                         color: "#787878",
-                        fontSize: "14px",
+                        fontSize: screens.xs ? 12 : 14,
                         fontWeight: 500,
                         margin: 0,
                     }}
@@ -199,11 +119,11 @@ const MainLayout: React.FC = () => {
                 <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
                     <Col xs={12} md={6}>
                         <DashboardCard
-                            title="Viscorion"
-                            subtitle="Rafiansyah"
+                            title="Security"
+                            subtitle="PB Tower"
                             status="ONLINE"
                             statusColor="green"
-                            icon={<ExperimentOutlined />}
+                            icon={<IdcardOutlined />}
                         />
                     </Col>
                     <Col xs={12} md={6}>
@@ -245,77 +165,7 @@ const MainLayout: React.FC = () => {
                 </Row>
             </motion.div>
 
-            <div
-                style={{
-                    padding: "4px 10px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                }}
-            >
-                <Title
-                    style={{
-                        color: "#787878",
-                        fontSize: "14px",
-                        fontWeight: 500,
-                        margin: 0,
-                    }}
-                >
-                    System Versions
-                </Title>
-                <div
-                    style={{
-                        flex: 1, // line fills remaining space
-                        height: "1px", // line thickness
-                        backgroundColor: "#d9d9d9", // line color
-                    }}
-                />
-            </div>
-
-            <Row gutter={[10, 12]} style={{ marginBottom: 16 }}>
-                <Col xs={6} md={6} xl={4}>
-                    <SystemVersionCard
-                        title="Next.js"
-                        icon="/assets/images/dashboard/logo-nextjs.png"
-                        version={process.env.NEXT_PUBLIC_NEXT_VERSION}
-                    />
-                </Col>
-                <Col xs={6} md={6} xl={4}>
-                    <SystemVersionCard
-                        title="React"
-                        icon="/assets/images/dashboard/logo-react.png"
-                        version={process.env.NEXT_PUBLIC_REACT_VERSION}
-                    />
-                </Col>
-                <Col xs={6} md={6} xl={4}>
-                    <SystemVersionCard
-                        title="AntD"
-                        icon="/assets/images/dashboard/logo-antd.png"
-                        version={process.env.NEXT_PUBLIC_ANTD_VERSION}
-                    />
-                </Col>
-                <Col xs={6} md={6} xl={4}>
-                    <SystemVersionCard
-                        title="Redux"
-                        icon="/assets/images/dashboard/logo-redux.png"
-                        version={process.env.NEXT_PUBLIC_REDUX_VERSION}
-                    />
-                </Col>
-                <Col xs={6} md={6} xl={4}>
-                    <SystemVersionCard
-                        title="Framer"
-                        icon="/assets/images/dashboard/logo-framer.png"
-                        version={process.env.NEXT_PUBLIC_FRAMER_VERSION}
-                    />
-                </Col>
-                <Col xs={6} md={6} xl={4}>
-                    <SystemVersionCard
-                        title="GDrive"
-                        icon="/assets/images/dashboard/logo-drive.png"
-                        version={process.env.NEXT_PUBLIC_GOOGLE_API_VERSION}
-                    />
-                </Col>
-            </Row>
+           
         </>
     );
 };

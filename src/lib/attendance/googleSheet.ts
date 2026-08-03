@@ -13,16 +13,17 @@ const sheets = google.sheets({
 
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID!;
 
-const EMPLOYEE_SHEET = "Members";
+const EMPLOYEE_SHEET = "Security";
 const ATTENDANCE_SHEET = "Attendance";
 const CHECKPOINTS_SHEET = "Checkpoints";
 const VISIT_SHEET = "Visits";
+const OFFICEHOURS_SHEET = "Hours";
 
 /* =========================
    EMPLOYEE
 ========================= */
 
-export async function getEmployees() {
+export async function getSecurity() {
     const res = await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: `${EMPLOYEE_SHEET}!A2:D`,
@@ -33,15 +34,15 @@ export async function getEmployees() {
     return rows.map((row) => ({
         id: row[0] ?? "",
         name: row[1] ?? "",
-        department: row[2] ?? "",
+        shift: row[2] ?? "",
         position: row[3] ?? "",
     }));
 }
 
-export async function addEmployee(data: {
+export async function addSecurity(data: {
     id: string;
     name: string;
-    department: string;
+    shift: string;
     position: string;
 }) {
     await sheets.spreadsheets.values.append({
@@ -49,26 +50,26 @@ export async function addEmployee(data: {
         range: `${EMPLOYEE_SHEET}!A:D`,
         valueInputOption: "USER_ENTERED",
         requestBody: {
-            values: [[data.id, data.name, data.department, data.position]],
+            values: [[data.id, data.name, data.shift, data.position]],
         },
     });
 
     return true;
 }
 
-export async function updateEmployee(
+export async function updateSecurity(
     id: string,
     data: {
         name: string;
-        department: string;
+        shift: string;
         position: string;
     },
 ) {
-    const employees = await getEmployees();
+    const security = await getSecurity();
 
-    const index = employees.findIndex((e) => e.id === id);
+    const index = security.findIndex((e) => e.id === id);
 
-    if (index === -1) throw new Error("Employee not found");
+    if (index === -1) throw new Error("Security not found");
 
     const rowNumber = index + 2;
 
@@ -77,21 +78,21 @@ export async function updateEmployee(
         range: `${EMPLOYEE_SHEET}!A${rowNumber}:D${rowNumber}`,
         valueInputOption: "USER_ENTERED",
         requestBody: {
-            values: [[id, data.name, data.department, data.position]],
+            values: [[id, data.name, data.shift, data.position]],
         },
     });
 
     return true;
 }
 
-export async function deleteEmployee(id: string) {
-    // Read employees
-    const employees = await getEmployees();
+export async function deleteSecurity(id: string) {
+    // Read security
+    const security = await getSecurity();
 
-    const rowIndex = employees.findIndex((e) => e.id === id);
+    const rowIndex = security.findIndex((e) => e.id === id);
 
     if (rowIndex === -1) {
-        throw new Error("Employee not found");
+        throw new Error("Security not found");
     }
 
     // Get spreadsheet metadata
@@ -99,15 +100,15 @@ export async function deleteEmployee(id: string) {
         spreadsheetId: SPREADSHEET_ID,
     });
 
-    const employeeSheet = spreadsheet.data.sheets?.find(
+    const securitySheet = spreadsheet.data.sheets?.find(
         (sheet) => sheet.properties?.title === EMPLOYEE_SHEET,
     );
 
-    if (!employeeSheet || employeeSheet.properties?.sheetId === undefined) {
-        throw new Error("Employees sheet not found");
+    if (!securitySheet || securitySheet.properties?.sheetId === undefined) {
+        throw new Error("Security sheet not found");
     }
 
-    const sheetId = employeeSheet.properties.sheetId;
+    const sheetId = securitySheet.properties.sheetId;
 
     // +1 because row 1 is the header
     // Google API uses zero-based indexes
@@ -149,7 +150,7 @@ export async function getAttendance() {
 
     return rows.map((row) => ({
         id: row[0] ?? "",
-        employeeId: row[1] ?? "",
+        securityId: row[1] ?? "",
         date: row[2] ?? "",
         checkIn: row[3] ?? "",
         checkOut: row[4] ?? "",
@@ -158,13 +159,13 @@ export async function getAttendance() {
     }));
 }
 
-export async function checkIn(employeeId: string, photoId: string) {
+export async function checkIn(securityId: string, photoId: string) {
     const today = new Date().toISOString().split("T")[0];
 
     const attendance = await getAttendance();
 
     const exist = attendance.find(
-        (a) => a.employeeId === employeeId && a.date === today,
+        (a) => a.securityId === securityId && a.date === today,
     );
 
     if (exist) throw new Error("Already checked in.");
@@ -177,7 +178,7 @@ export async function checkIn(employeeId: string, photoId: string) {
             values: [
                 [
                     crypto.randomUUID(),
-                    employeeId,
+                    securityId,
                     today,
                     new Date().toLocaleTimeString(),
                     "",
@@ -191,13 +192,13 @@ export async function checkIn(employeeId: string, photoId: string) {
     return true;
 }
 
-export async function checkOut(employeeId: string) {
+export async function checkOut(securityId: string) {
     const today = new Date().toISOString().split("T")[0];
 
     const attendance = await getAttendance();
 
     const index = attendance.findIndex(
-        (a) => a.employeeId === employeeId && a.date === today,
+        (a) => a.securityId === securityId && a.date === today,
     );
 
     if (index === -1) throw new Error("Check in not found.");
@@ -212,7 +213,7 @@ export async function checkOut(employeeId: string) {
             values: [
                 [
                     attendance[index].id,
-                    employeeId,
+                    securityId,
                     today,
                     attendance[index].checkIn,
                     new Date().toLocaleTimeString(),
@@ -240,7 +241,7 @@ export async function getCheckpoints() {
     }));
 }
 export async function visitCheckpoint(data: {
-    employeeId: string;
+    securityId: string;
     checkpointId: string;
     evidence: string;
 }) {
@@ -260,7 +261,7 @@ export async function visitCheckpoint(data: {
     const attendance = await getAttendance();
 
     const todayAttendance = attendance.find(
-        (a) => a.employeeId === data.employeeId && a.date === today,
+        (a) => a.securityId === data.securityId && a.date === today,
     );
 
     if (!todayAttendance) {
@@ -276,7 +277,7 @@ export async function visitCheckpoint(data: {
 
     const alreadyVisited = rows.find(
         (row) =>
-            row[2] === data.employeeId &&
+            row[2] === data.securityId &&
             row[3] === data.checkpointId &&
             row[4]?.split(" ")[0] === today,
     );
@@ -294,7 +295,7 @@ export async function visitCheckpoint(data: {
                 [
                     crypto.randomUUID(),
                     todayAttendance.id,
-                    data.employeeId,
+                    data.securityId,
                     data.checkpointId,
                     timestamp,
                     data.evidence,
@@ -317,9 +318,26 @@ export async function getVisits() {
     return rows.map((row) => ({
         id: row[0] ?? "",
         attendanceId: row[1] ?? "",
-        employeeId: row[2] ?? "",
+        securityId: row[2] ?? "",
         checkpointId: row[3] ?? "",
         visitTime: row[4] ?? "",
         evidence: row[5] ?? "",
+    }));
+}
+
+
+export async function getOfficeHours() {
+    const res = await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${OFFICEHOURS_SHEET}!A2:D`,
+    });
+
+    const rows = res.data.values ?? [];
+
+    return rows.map((row) => ({
+        startHours: row[0] ?? "",
+        maxStartHours: row[1] ?? "",
+        finishHours: row[2] ?? "",
+        maxFinishHours: row[3] ?? "",
     }));
 }

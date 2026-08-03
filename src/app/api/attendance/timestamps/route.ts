@@ -16,17 +16,17 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const {
-      employeeId,
+      securityId,
       type,
       photoId,
     } = body;
 
     if (type === "checkin") {
-      await checkIn(employeeId, photoId);
+      await checkIn(securityId, photoId);
     }
 
     if (type === "checkout") {
-      await checkOut(employeeId);
+      await checkOut(securityId);
     }
 
     return NextResponse.json({

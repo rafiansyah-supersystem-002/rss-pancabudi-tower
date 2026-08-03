@@ -18,38 +18,38 @@ import axios from "axios";
 const { Title } = Typography;
 const { useBreakpoint } = Grid;
 
-interface Employee {
+interface Security {
     id: string;
     name: string;
-    department: string;
+    shift: string;
     position: string;
 }
 
 export default function Home() {
-    const [employees, setEmployees] = useState<Employee[]>([]);
+    const [security, setSecurity] = useState<Security[]>([]);
     const [loading, setLoading] = useState(false);
 
     const [open, setOpen] = useState(false);
-    const [editing, setEditing] = useState<Employee | null>(null);
+    const [editing, setEditing] = useState<Security | null>(null);
 
     const [form] = Form.useForm();
     const screens = useBreakpoint();
 
-    const loadEmployees = async () => {
+    const loadSecurity = async () => {
         setLoading(true);
 
         try {
             const res = await axios.get("/api/attendance/members");
-            setEmployees(res.data);
+            setSecurity(res.data);
         } catch {
-            message.error("Failed to load employees");
+            message.error("Failed to load security");
         }
 
         setLoading(false);
     };
 
     useEffect(() => {
-        loadEmployees();
+        loadSecurity();
     }, []);
 
     const onAdd = () => {
@@ -58,9 +58,9 @@ export default function Home() {
         setOpen(true);
     };
 
-    const onEdit = (employee: Employee) => {
-        setEditing(employee);
-        form.setFieldsValue(employee);
+    const onEdit = (security: Security) => {
+        setEditing(security);
+        form.setFieldsValue(security);
         setOpen(true);
     };
 
@@ -68,14 +68,14 @@ export default function Home() {
         try {
             await axios.delete(`/api/attendance/members?id=${id}`);
 
-            message.success("Employee deleted");
-            loadEmployees();
+            message.success("Security deleted");
+            loadSecurity();
         } catch {
             message.error("Delete failed");
         }
     };
 
-    const onFinish = async (values: Employee) => {
+    const onFinish = async (values: Security) => {
         try {
             if (editing) {
                 await axios.put("/api/attendance/members", {
@@ -83,16 +83,16 @@ export default function Home() {
                     id: editing.id,
                 });
 
-                message.success("Employee updated");
+                message.success("Security updated");
             } else {
                 await axios.post("/api/attendance/members", values);
 
-                message.success("Employee added");
+                message.success("Security added");
             }
 
             setOpen(false);
             form.resetFields();
-            loadEmployees();
+            loadSecurity();
         } catch {
             message.error("Save failed");
         }
@@ -114,8 +114,8 @@ export default function Home() {
             dataIndex: "name",
         },
         {
-            title: "Department",
-            dataIndex: "department",
+            title: "Shift",
+            dataIndex: "shift",
         },
         {
             title: "Position",
@@ -123,14 +123,14 @@ export default function Home() {
         },
         {
             title: "Action",
-            render: (_: unknown, record: Employee) => (
+            render: (_: unknown, record: Security) => (
                 <Space>
                     <Button type="primary" onClick={() => onEdit(record)}>
                         Edit
                     </Button>
 
                     <Popconfirm
-                        title="Delete employee?"
+                        title="Delete security?"
                         onConfirm={() => onDelete(record.id)}
                     >
                         <Button danger>Delete</Button>
@@ -151,14 +151,14 @@ export default function Home() {
                 }}
             >
                 <Button type="primary" onClick={onAdd}>
-                    Add Employee
+                    Add Security
                 </Button>
             </Space>
             <Table
                 size="small"
                 loading={loading}
                 columns={columns}
-                dataSource={employees}
+                dataSource={security}
                 pagination={{ pageSize: 10 }}
                 scroll={{ x: 600 }}
                 bordered
@@ -197,14 +197,14 @@ export default function Home() {
 
             <Modal
                 open={open}
-                title={editing ? "Edit Employee" : "Add Employee"}
+                title={editing ? "Edit Security" : "Add Security"}
                 onCancel={() => setOpen(false)}
                 footer={null}
             >
                 <Form form={form} layout="vertical" onFinish={onFinish}>
                     {!editing && (
                         <Form.Item
-                            label="Employee ID"
+                            label="Security ID"
                             name="id"
                             rules={[
                                 {
@@ -229,8 +229,8 @@ export default function Home() {
                     </Form.Item>
 
                     <Form.Item
-                        label="Department"
-                        name="department"
+                        label="Shift"
+                        name="shift"
                         rules={[
                             {
                                 required: true,
@@ -253,7 +253,7 @@ export default function Home() {
                     </Form.Item>
 
                     <Button type="primary" htmlType="submit" block>
-                        {editing ? "Update Employee" : "Add Employee"}
+                        {editing ? "Update Security" : "Add Security"}
                     </Button>
                 </Form>
             </Modal>

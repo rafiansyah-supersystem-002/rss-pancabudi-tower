@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
 
     const photo = formData.get("photo") as File | null;
-    const employeeId = formData.get("employeeId") as string;
+    const securityId = formData.get("securityId") as string;
 
     if (!photo) {
       return NextResponse.json(
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await uploadAttendancePhoto(employeeId, photo);
+    const result = await uploadAttendancePhoto(securityId, photo);
 
     return NextResponse.json({
       success: true,

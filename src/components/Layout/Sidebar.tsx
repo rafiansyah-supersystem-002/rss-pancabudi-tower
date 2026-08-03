@@ -94,9 +94,9 @@ export default function Sidebar({
             >
                 <motion.div
                     style={{
-                        height: 48,
+                        height: screens.xs? 58:68,
                         marginTop: screens.xs && collapsed ? 6 : 12,
-                        marginBottom: screens.xs && collapsed ? -4 : 0,
+                        marginBottom: screens.xs && collapsed ? -12 : -4,
                         marginLeft: screens.xs && collapsed ? 6 : 12,
                         marginRight: screens.xs && collapsed ? 6 : 12,
 
@@ -124,10 +124,10 @@ export default function Sidebar({
                                 style={{ perspective: 600 }}
                             >
                                 <Image
-                                    src="/assets/logo/rd_silverwood02.svg"
+                                    src="/assets/logo/pb_logo02.svg"
                                     alt="Company Logo"
-                                    width={screens.xs ? 40 : 50}
-                                    height={screens.xs ? 40 : 50}
+                                    width={screens.xs ? 30 :40}
+                                    height={screens.xs ? 30 : 40}
                                 />
                             </motion.div>
                         ) : (
@@ -146,12 +146,12 @@ export default function Sidebar({
                                 <Image
                                     src={
                                         isDark
-                                            ? "/assets/logo/rd_silverwood_dark.svg"
-                                            : "/assets/logo/rd_silverwood.svg"
+                                            ? "/assets/logo/pb_logo01.svg"
+                                            : "/assets/logo/pb_logo01.svg"
                                     }
                                     alt="Company Logo"
-                                    width={screens.xs ? 170 : 160}
-                                    height={screens.xs ? 48 : 44}
+                                    width={screens.xs ? 160 : 160}
+                                    height={screens.xs ? 60 : 60}
                                 />
                             </motion.div>
                         )}

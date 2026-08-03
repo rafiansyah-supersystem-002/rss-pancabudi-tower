@@ -1,98 +1,98 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-    getEmployees,
-    addEmployee,
-    updateEmployee,
-    deleteEmployee,
+    getSecurity,
+    addSecurity,
+    updateSecurity,
+    deleteSecurity,
 } from "@/lib/attendance/googleSheet";
 
-// GET /api/employees
+// GET /api/security
 export async function GET() {
     try {
-        const employees = await getEmployees();
+        const security = await getSecurity();
 
-        return NextResponse.json(employees);
+        return NextResponse.json(security);
     } catch (error) {
         console.error(error);
 
         return NextResponse.json(
-            { message: "Failed to fetch employees" },
+            { message: "Failed to fetch security" },
             { status: 500 },
         );
     }
 }
 
-// POST /api/employees
+// POST /api/security
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
 
-        await addEmployee({
+        await addSecurity({
             id: body.id,
             name: body.name,
-            department: body.department,
+            shift: body.shift,
             position: body.position,
         });
 
         return NextResponse.json({
-            message: "Employee added successfully",
+            message: "Security added successfully",
         });
     } catch (error) {
         console.error(error);
 
         return NextResponse.json(
-            { message: "Failed to add employee" },
+            { message: "Failed to add security" },
             { status: 500 },
         );
     }
 }
 
-// PUT /api/employees
+// PUT /api/security
 export async function PUT(req: NextRequest) {
     try {
         const body = await req.json();
 
-        await updateEmployee(body.id, {
+        await updateSecurity(body.id, {
             name: body.name,
-            department: body.department,
+            shift: body.shift,
             position: body.position,
         });
 
         return NextResponse.json({
-            message: "Employee updated successfully",
+            message: "Security updated successfully",
         });
     } catch (error) {
         console.error(error);
 
         return NextResponse.json(
-            { message: "Failed to update employee" },
+            { message: "Failed to update security" },
             { status: 500 },
         );
     }
 }
 
-// DELETE /api/employees?id=EMP001
+// DELETE /api/security?id=EMP001
 export async function DELETE(req: NextRequest) {
     try {
         const id = req.nextUrl.searchParams.get("id");
 
         if (!id) {
             return NextResponse.json(
-                { message: "Employee ID is required" },
+                { message: "Security ID is required" },
                 { status: 400 },
             );
         }
 
-        await deleteEmployee(id);
+        await deleteSecurity(id);
 
         return NextResponse.json({
-            message: "Employee deleted successfully",
+            message: "Security deleted successfully",
         });
     } catch (error) {
         console.error(error);
 
         return NextResponse.json(
-            { message: "Failed to delete employee" },
+            { message: "Failed to delete security" },
             { status: 500 },
         );
     }

@@ -69,12 +69,12 @@ export default function AppFooter({ isDark }: AppFooterProps) {
                         <Image
                             src={
                                 isDark
-                                    ? "/assets/logo/rd_silverwood_dark.svg"
-                                    : "/assets/logo/rd_silverwood.svg"
+                                    ? "/assets/logo/pb_logo01.svg"
+                                    : "/assets/logo/pb_logo01.svg"
                             }
                             alt="Logo"
-                            width={isXs ? 96 : 180}
-                            height={isXs ? 28 : 48}
+                            width={isXs ? 88 : 130}
+                            height={isXs ? 32 : 46}
                         />
 
                         {/* SOCIALS */}

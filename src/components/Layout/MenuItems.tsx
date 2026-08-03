@@ -30,26 +30,20 @@ export const MenuItems: MenuItemType[] = [
         label: "Dashboard",
         path: "/",
     },
-    {
-        key: "/profile",
-        icon: <UserOutlined />,
-        label: "Profile",
-        path: "/profile",
-    },
-    {
+     {
         key: "attend",
-        label: "Attendance",
+        label: "Security",
         icon: <IdcardOutlined />,
         children: [
             {
                 key: "attend1",
-                label: "Timestamps",
+                label: "Attendance",
                 icon: <IdcardOutlined />,
                 path: "/attendance/timestamps",
             },
             {
                 key: "attend2",
-                label: "Members",
+                label: "Staff",
                 icon: <IdcardOutlined />,
                 path: "/attendance/members",
             },
