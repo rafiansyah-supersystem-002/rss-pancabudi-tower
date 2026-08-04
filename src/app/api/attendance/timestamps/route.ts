@@ -18,11 +18,12 @@ export async function POST(req: NextRequest) {
     const {
       securityId,
       type,
+      status,
       photoId,
     } = body;
 
     if (type === "checkin") {
-      await checkIn(securityId, photoId);
+      await checkIn(securityId, photoId, status);
     }
 
     if (type === "checkout") {

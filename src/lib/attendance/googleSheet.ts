@@ -159,7 +159,7 @@ export async function getAttendance() {
     }));
 }
 
-export async function checkIn(securityId: string, photoId: string) {
+export async function checkIn(securityId: string, photoId: string, status: string) {
     const today = new Date().toISOString().split("T")[0];
 
     const attendance = await getAttendance();
@@ -182,7 +182,7 @@ export async function checkIn(securityId: string, photoId: string) {
                     today,
                     new Date().toLocaleTimeString(),
                     "",
-                    "Present",
+                 status,
                     photoId,
                 ],
             ],
@@ -217,7 +217,7 @@ export async function checkOut(securityId: string) {
                     today,
                     attendance[index].checkIn,
                     new Date().toLocaleTimeString(),
-                    "Present",
+                     attendance[index].status,
                 ],
             ],
         },

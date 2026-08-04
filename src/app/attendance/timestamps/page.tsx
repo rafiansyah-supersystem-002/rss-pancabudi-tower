@@ -16,6 +16,7 @@ import {
     Tabs,
     Tag,
     Avatar,
+    Divider,
 } from "antd";
 import {
     UploadOutlined,
@@ -23,6 +24,7 @@ import {
     LogoutOutlined,
     LoginOutlined,
     UserOutlined,
+    SearchOutlined,
 } from "@ant-design/icons";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import axios from "axios";
@@ -93,6 +95,8 @@ export default function AttendancePage() {
     const [scannedCheckpoint, setScannedCheckpoint] =
         useState<Checkpoint | null>(null);
     const [checkpointPhoto, setCheckpointPhoto] = useState<File>();
+const [selectedDate, setSelectedDate] = useState(null);
+
 
     async function loadSecurity() {
         const res = await axios.get("/api/attendance/members");
@@ -165,14 +169,46 @@ export default function AttendancePage() {
             );
 
             const photoId = uploadRes.data.fileId;
+            const office = officeHours[0];
+
+            if (!office) {
+                message.error("Office hours not loaded");
+                return;
+            }
+
+            const now = new Date();
+
+            // Office start time
+            const [startHour, startMinute] = office.startHours
+                .split(":")
+                .map(Number);
+            const startLimit = new Date();
+            startLimit.setHours(startHour, startMinute, 0, 0);
+
+            // Maximum allowed check-in time
+            const [maxHour, maxMinute] = office.maxStartHours
+                .split(":")
+                .map(Number);
+            const maxLimit = new Date();
+            maxLimit.setHours(maxHour, maxMinute, 0, 0);
+
+            let status: "Present" | "Late" | "Absent";
+
+            if (now <= startLimit) {
+                status = "Present";
+            } else if (now <= maxLimit) {
+                status = "Late";
+            } else {
+                status = "Absent";
+            }
 
             // Step 2: Save attendance
             await axios.post("/api/attendance/timestamps", {
                 securityId,
                 type: "checkin",
                 photoId,
+                status,
             });
-
             Modal.success({
                 title: "Success",
                 content: "Checked in successfully.",
@@ -392,6 +428,7 @@ export default function AttendancePage() {
 
         codeReaderRef.current = null;
     };
+    
 
     return (
         <div style={{ padding: 0 }}>
@@ -408,11 +445,11 @@ export default function AttendancePage() {
                         ),
                         children: (
                             <>
-                            <Text>
-    {officeHours.length > 0
-        ? `${officeHours[0].startHours} - ${officeHours[0].finishHours}`
-        : "Loading..."}
-</Text>
+                                <Text>
+                                    {officeHours.length > 0
+                                        ? `${officeHours[0].startHours} - ${officeHours[0].finishHours}`
+                                        : "Loading..."}
+                                </Text>
                                 <Card
                                     title={
                                         <span
@@ -441,33 +478,6 @@ export default function AttendancePage() {
                                             options={securitySelect}
                                             onChange={setEmployeeId}
                                         />
-
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                gap: 8,
-                                                width: "100%",
-                                            }}
-                                        >
-                                            <Button
-                                                type="primary"
-                                                style={{ flex: 1 }}
-                                                onClick={checkIn}
-                                                loading={loading}
-                                                disabled={loading}
-                                            >
-                                                Check In
-                                            </Button>
-
-                                            <Button
-                                                style={{ flex: 1 }}
-                                                onClick={checkOut}
-                                                loading={loading}
-                                                disabled={loading}
-                                            >
-                                                Check Out
-                                            </Button>
-                                        </div>
 
                                         <input
                                             id="photo-upload"
@@ -502,233 +512,187 @@ export default function AttendancePage() {
                                                 ? photo.name
                                                 : "Choose Photo"}
                                         </label>
-                                    </Space>
-                                    <Card
-                                        title={
-                                            <span
-                                                style={{
-                                                    fontSize: "14px",
-                                                    fontWeight: 600,
-                                                }}
-                                            >
-                                                Attendance History
-                                            </span>
-                                        }
-                                        styles={{
-                                            body: {
-                                                padding: 10,
-                                            },
-                                        }}
-                                        style={{ marginTop: 24 }}
-                                    >
-                                        <Table
-                                            rowKey="id"
-                                            scroll={{ x: "max-content" }}
-                                            columns={[
-                                                {
-                                                    title: "Security",
-                                                    render: (_, row) =>
-                                                        security.find(
-                                                            (e) =>
-                                                                e.id ===
-                                                                row.securityId,
-                                                        )?.name,
-                                                },
-                                                {
-                                                    title: "Date",
-                                                    dataIndex: "date",
-                                                },
-                                                {
-                                                    title: "Check In",
-                                                    dataIndex: "checkIn",
-                                                },
-                                                {
-                                                    title: "Check Out",
-                                                    dataIndex: "checkOut",
-                                                },
-                                                {
-                                                    title: "Status",
-                                                    dataIndex: "status",
-                                                },
-                                            ]}
-                                            dataSource={attendance}
-                                        />
-                                    </Card>
-                                    <Card
-                                        title={
-                                            <span
-                                                style={{
-                                                    fontSize: "14px",
-                                                    fontWeight: 600,
-                                                }}
-                                            >
-                                                Visit History
-                                            </span>
-                                        }
-                                        styles={{
-                                            body: {
-                                                padding: 10,
-                                            },
-                                        }}
-                                        style={{ marginTop: 24 }}
-                                    >
-                                        <Table
-                                            rowKey="id"
-                                            scroll={{ x: "max-content" }}
-                                            dataSource={visits}
-                                            pagination={{ pageSize: 10 }}
-                                            columns={[
-                                                {
-                                                    title: "Security",
-                                                    render: (_, row) =>
-                                                        security.find(
-                                                            (e) =>
-                                                                e.id ===
-                                                                row.securityId,
-                                                        )?.name,
-                                                },
-                                                {
-                                                    title: "Checkpoint",
-                                                    render: (_, row) =>
-                                                        checkpoints.find(
-                                                            (c: any) =>
-                                                                c.id ===
-                                                                row.checkpointId,
-                                                        )?.name,
-                                                },
-                                                {
-                                                    title: "Visit Time",
-                                                    dataIndex: "visitTime",
-                                                },
-                                                {
-                                                    title: "Evidence",
-                                                    render: (_, row) => (
-                                                        <a
-                                                            href={row.evidence}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                        >
-                                                            View Photo
-                                                        </a>
-                                                    ),
-                                                },
-                                            ]}
-                                        />
-                                    </Card>
-                                    <Card
-                                        title={
-                                            <span
-                                                style={{
-                                                    fontSize: 14,
-                                                    fontWeight: 600,
-                                                }}
-                                            >
-                                                Attendance History
-                                            </span>
-                                        }
-                                        styles={{
-                                            body: {
-                                                padding: 16,
-                                            },
-                                        }}
-                                        style={{ marginTop: 24 }}
-                                    >
-                                        <Space
-                                            direction="vertical"
-                                            size={16}
-                                            style={{ width: "100%" }}
+
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                gap: 8,
+                                                width: "100%",
+                                            }}
                                         >
-                                            {attendance.map((item) => {
-                                                const securityData =
-                                                    security.find(
-                                                        (e) =>
-                                                            e.id ===
-                                                            item.securityId,
+                                            <Button
+                                                type="primary"
+                                                style={{ flex: 1 }}
+                                                onClick={checkIn}
+                                                loading={loading}
+                                                disabled={loading}
+                                            >
+                                                Check In
+                                            </Button>
+
+                                            <Button
+                                                style={{ flex: 1 }}
+                                                onClick={checkOut}
+                                                loading={loading}
+                                                disabled={loading}
+                                            >
+                                                Check Out
+                                            </Button>
+                                        </div>
+                                    </Space>
+
+                                    <Space
+                                        orientation="vertical"
+                                        size={16}
+                                        style={{ width: "100%", marginTop: 20 }}
+                                    >
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                width: "100%",
+                                                overflow: "hidden",
+                                            }}
+                                        >
+                                            <Divider
+                                                style={{
+                                                    flex: 1,
+                                                    minWidth: 0,
+                                                    margin: "0 8px 0 0",
+                                                    borderColor: "#c3c0c0",
+                                                }}
+                                            />
+
+                                            <Tag
+                                                bordered
+                                                style={{
+                                                    flexShrink: 0,
+                                                    borderRadius: 999,
+                                                    background: "transparent",
+                                                    fontSize: 12,
+                                                    margin: 0,
+                                                    padding: "2px 10px",
+                                                }}
+                                            >
+                                                {new Date().toLocaleDateString(
+                                                    "en-GB",
+                                                    {
+                                                        day: "2-digit",
+                                                        month: "short",
+                                                        year: "numeric",
+                                                    },
+                                                )}
+                                            </Tag>
+                                        </div>
+
+                                        {attendance.map((item) => {
+                                            const securityData = security.find(
+                                                (e) => e.id === item.securityId,
+                                            );
+
+                                            // Match visit history by security + same date
+                                            const matchedVisits = visits.filter(
+                                                (visit) => {
+                                                    const attendanceDate =
+                                                        item.date.split(" ")[0];
+                                                    const visitDate =
+                                                        visit.visitTime.split(
+                                                            " ",
+                                                        )[0];
+
+                                                    return (
+                                                        visit.securityId ===
+                                                            item.securityId &&
+                                                        attendanceDate ===
+                                                            visitDate
                                                     );
+                                                },
+                                            );
 
-                                                // Match visit history by security + same date
-                                                const matchedVisits =
-                                                    visits.filter((visit) => {
-                                                        const attendanceDate =
-                                                            item.date.split(
-                                                                " ",
-                                                            )[0];
-                                                        const visitDate =
-                                                            visit.visitTime.split(
-                                                                " ",
-                                                            )[0];
-
-                                                        return (
-                                                            visit.securityId ===
-                                                                item.securityId &&
-                                                            attendanceDate ===
-                                                                visitDate
-                                                        );
-                                                    });
-
-                                                return (
-                                                    <Card
-                                                        key={item.id}
-                                                        hoverable
+                                            return (
+                                                <Card
+                                                    key={item.id}
+                                                    hoverable
+                                                    style={{
+                                                        borderRadius: 16,
+                                                        boxShadow:
+                                                            "0 2px 8px rgba(0,0,0,0.08)",
+                                                    }}
+                                                    styles={{
+                                                        body: {
+                                                            padding:
+                                                                "16px 12px",
+                                                        },
+                                                    }}
+                                                >
+                                                    <Space
+                                                        align="start"
                                                         style={{
-                                                            borderRadius: 16,
-                                                            boxShadow:
-                                                                "0 8px 24px rgba(0,0,0,0.08)",
-                                                        }}
-                                                        styles={{
-                                                            body: {
-                                                                padding: 20,
-                                                            },
+                                                            width: "100%",
                                                         }}
                                                     >
-                                                        <Space
-                                                            align="start"
+                                                        <Avatar
+                                                            size={32}
+                                                            icon={
+                                                                <UserOutlined />
+                                                            }
+                                                        />
+
+                                                        <div
                                                             style={{
-                                                                width: "100%",
+                                                                flex: 1,
                                                             }}
                                                         >
-                                                            <Avatar
-                                                                size={64}
-                                                                icon={
-                                                                    <UserOutlined />
-                                                                }
-                                                            />
-
-                                                            <div
+                                                            <Typography.Title
                                                                 style={{
-                                                                    flex: 1,
+                                                                    fontSize: 14,
+                                                                    margin: 0,
                                                                 }}
                                                             >
-                                                                <Typography.Title
-                                                                    level={5}
+                                                                {securityData?.name ??
+                                                                    "Unknown Security"}
+                                                            </Typography.Title>
+                                                            {/* Status */}
+                                                            <div
+                                                                style={{
+                                                                    marginTop: 2,
+                                                                }}
+                                                            >
+                                                                <Tag
+                                                                    color={
+                                                                        item.status ===
+                                                                        "Present"
+                                                                            ? "success"
+                                                                            : item.status ===
+                                                                                "Late"
+                                                                              ? "warning"
+                                                                              : "error"
+                                                                    }
                                                                     style={{
-                                                                        margin: 0,
+                                                                        padding:
+                                                                            "6px 8px",
+                                                                        borderRadius: 20,
+                                                                        marginBottom: 0,
                                                                     }}
                                                                 >
-                                                                    {securityData?.name ??
-                                                                        "Unknown Security"}
-                                                                </Typography.Title>
-
-                                                                <Typography.Text type="secondary">
-                                                                    {item.date}
-                                                                </Typography.Text>
+                                                                    {
+                                                                        item.status
+                                                                    }
+                                                                </Tag>
 
                                                                 {/* Check In / Out */}
                                                                 <Space
                                                                     wrap
-                                                                    size={8}
-                                                                    style={{
-                                                                        marginTop: 16,
-                                                                    }}
+                                                                    size={4}
                                                                 >
                                                                     <Tag
                                                                         icon={
                                                                             <LoginOutlined />
                                                                         }
-                                                                        color="green"
+                                                                        color="success"
                                                                         style={{
                                                                             padding:
-                                                                                "6px 12px",
+                                                                                "6px 8px",
                                                                             borderRadius: 20,
                                                                         }}
                                                                     >
@@ -741,10 +705,10 @@ export default function AttendancePage() {
                                                                         icon={
                                                                             <LogoutOutlined />
                                                                         }
-                                                                        color="red"
+                                                                        color="error"
                                                                         style={{
                                                                             padding:
-                                                                                "6px 12px",
+                                                                                "6px 8px",
                                                                             borderRadius: 20,
                                                                         }}
                                                                     >
@@ -753,135 +717,150 @@ export default function AttendancePage() {
                                                                         }
                                                                     </Tag>
                                                                 </Space>
+                                                            </div>
 
-                                                                {/* Status */}
-                                                                <div
+                                                            {/* Checkpoints */}
+                                                            <div
+                                                                style={{
+                                                                    marginTop: 8,
+                                                                }}
+                                                            >
+                                                                <Typography.Text
+                                                                    strong
                                                                     style={{
-                                                                        marginTop: 12,
+                                                                        fontSize: 12,
                                                                     }}
                                                                 >
-                                                                    <Tag
-                                                                        color={
-                                                                            item.status ===
-                                                                            "Present"
-                                                                                ? "success"
-                                                                                : item.status ===
-                                                                                    "Late"
-                                                                                  ? "warning"
-                                                                                  : "error"
-                                                                        }
-                                                                    >
-                                                                        {
-                                                                            item.status
-                                                                        }
-                                                                    </Tag>
-                                                                </div>
+                                                                    Checkpoints
+                                                                </Typography.Text>
 
-                                                                {/* Checkpoints */}
-                                                                <div
+                                                                <Space
+                                                                    direction="vertical"
                                                                     style={{
-                                                                        marginTop: 18,
+                                                                        width: "100%",
+                                                                        marginTop: 0,
                                                                     }}
+                                                                    size={6}
                                                                 >
-                                                                    <Typography.Text
-                                                                        strong
-                                                                    >
-                                                                        Checkpoints
-                                                                    </Typography.Text>
+                                                                    {matchedVisits.length >
+                                                                    0 ? (
+                                                                        matchedVisits.map(
+                                                                            (
+                                                                                visit,
+                                                                            ) => {
+                                                                                const checkpoint =
+                                                                                    checkpoints.find(
+                                                                                        (
+                                                                                            c: any,
+                                                                                        ) =>
+                                                                                            c.id ===
+                                                                                            visit.checkpointId,
+                                                                                    );
 
-                                                                    <Space
-                                                                        direction="vertical"
-                                                                        style={{
-                                                                            width: "100%",
-                                                                            marginTop: 8,
-                                                                        }}
-                                                                        size={6}
-                                                                    >
-                                                                        {matchedVisits.length >
-                                                                        0 ? (
-                                                                            matchedVisits.map(
-                                                                                (
-                                                                                    visit,
-                                                                                ) => {
-                                                                                    const checkpoint =
-                                                                                        checkpoints.find(
-                                                                                            (
-                                                                                                c: any,
-                                                                                            ) =>
-                                                                                                c.id ===
-                                                                                                visit.checkpointId,
-                                                                                        );
-
-                                                                                    return (
-                                                                                        <Card
-                                                                                            key={
-                                                                                                visit.id
-                                                                                            }
-                                                                                            size="small"
+                                                                                return (
+                                                                                    <Card
+                                                                                        key={
+                                                                                            visit.id
+                                                                                        }
+                                                                                        size="small"
+                                                                                        style={{
+                                                                                            borderRadius: 10,
+                                                                                        }}
+                                                                                        styles={{
+                                                                                            body: {
+                                                                                                padding:
+                                                                                                    "4px 12px",
+                                                                                            },
+                                                                                        }}
+                                                                                    >
+                                                                                        <Space
                                                                                             style={{
-                                                                                                borderRadius: 10,
+                                                                                                width: "100%",
+                                                                                                justifyContent:
+                                                                                                    "space-between",
                                                                                             }}
                                                                                         >
-                                                                                            <Space
+                                                                                            <div>
+                                                                                                <Typography.Text
+                                                                                                    strong
+                                                                                                    style={{
+                                                                                                        display:
+                                                                                                            "block",
+                                                                                                        fontSize: 12,
+                                                                                                        lineHeight: 1.2,
+                                                                                                        marginBottom: 2,
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {checkpoint?.name ??
+                                                                                                        "Unknown Checkpoint"}
+                                                                                                </Typography.Text>
+
+                                                                                                <Typography.Text
+                                                                                                    type="secondary"
+                                                                                                    style={{
+                                                                                                        display:
+                                                                                                            "block",
+                                                                                                        fontSize: 12,
+                                                                                                        lineHeight: 1.2,
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {new Date(
+                                                                                                        visit.visitTime,
+                                                                                                    ).toLocaleTimeString(
+                                                                                                        "en-GB",
+                                                                                                        {
+                                                                                                            hour: "2-digit",
+                                                                                                            minute: "2-digit",
+                                                                                                            second: "2-digit",
+                                                                                                            hour12: false,
+                                                                                                        },
+                                                                                                    )}
+                                                                                                </Typography.Text>
+                                                                                            </div>
+
+                                                                                            <Button
+                                                                                                type="default"
+                                                                                                size="small"
+                                                                                                icon={
+                                                                                                    <SearchOutlined />
+                                                                                                }
+                                                                                                href={
+                                                                                                    visit.evidence
+                                                                                                }
+                                                                                                target="_blank"
                                                                                                 style={{
-                                                                                                    width: "100%",
-                                                                                                    justifyContent:
-                                                                                                        "space-between",
+                                                                                                    paddingInline: 6,
+                                                                                                    height: 24,
+                                                                                                    fontSize: 12,
                                                                                                 }}
                                                                                             >
-                                                                                                <div>
-                                                                                                    <Typography.Text
-                                                                                                        strong
-                                                                                                    >
-                                                                                                        {checkpoint?.name ??
-                                                                                                            "Unknown Checkpoint"}
-                                                                                                    </Typography.Text>
-
-                                                                                                    <br />
-
-                                                                                                    <Typography.Text
-                                                                                                        type="secondary"
-                                                                                                        style={{
-                                                                                                            fontSize: 12,
-                                                                                                        }}
-                                                                                                    >
-                                                                                                        {
-                                                                                                            visit.visitTime
-                                                                                                        }
-                                                                                                    </Typography.Text>
-                                                                                                </div>
-
-                                                                                                <a
-                                                                                                    href={
-                                                                                                        visit.evidence
-                                                                                                    }
-                                                                                                    target="_blank"
-                                                                                                    rel="noreferrer"
-                                                                                                >
-                                                                                                    View
-                                                                                                    Photo
-                                                                                                </a>
-                                                                                            </Space>
-                                                                                        </Card>
-                                                                                    );
-                                                                                },
-                                                                            )
-                                                                        ) : (
-                                                                            <Typography.Text type="secondary">
-                                                                                No
-                                                                                checkpoints
-                                                                                visited.
-                                                                            </Typography.Text>
-                                                                        )}
-                                                                    </Space>
-                                                                </div>
+                                                                                                View
+                                                                                            </Button>
+                                                                                        </Space>
+                                                                                    </Card>
+                                                                                );
+                                                                            },
+                                                                        )
+                                                                    ) : (
+                                                                        <Typography.Text
+                                                                            type="secondary"
+                                                                            style={{
+                                                                                fontSize: 12,
+                                                                            }}
+                                                                        >
+                                                                            No
+                                                                            checkpoints
+                                                                            visited.
+                                                                        </Typography.Text>
+                                                                    )}
+                                                                </Space>
                                                             </div>
-                                                        </Space>
-                                                    </Card>
-                                                );
-                                            })}
-                                        </Space>
-                                    </Card>
+                                                        </div>
+                                                    </Space>
+                                                </Card>
+                                            );
+                                        })}
+                                    </Space>
                                 </Card>
                             </>
                         ),
