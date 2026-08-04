@@ -163,16 +163,9 @@ export default function AppFooter({ isDark }: AppFooterProps) {
                             }}
                         >
                             <span style={{ fontWeight: 500 }}>
-                                Silverwood Technologies
+                                Panca Budi 
                             </span>{" "}
-                            Master App is an unofficial portfolio web
-                            application by{" "}
-                            <span style={{ fontWeight: 500 }}>
-                                Mahesa Rafiansyah
-                            </span>
-                            , featuring projects built with modern React.js
-                            technology, specifically Next.js, focused on refined
-                            user experience.
+                            Tower App is an unofficial multi purpose web application designed to manage workflows and assisting internal company managements, featuring friendly and informative UI to deliver complicated data into understandable contents. 
                         </Text>
                     ) : (
                         <Text
