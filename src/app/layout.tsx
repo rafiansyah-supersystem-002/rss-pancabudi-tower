@@ -4,7 +4,7 @@ import AppLoadingOverlay from "@/app/layout-loading";
 import ClientConditionalLayout from "@/components/Providers/AuthClientLayout";
 
 export const metadata = {
-    title: "Rafiansyah Supersystems",
+    title: "Pancabudi Tower App",
     description: "Useful Multipurpose app",
 };
 

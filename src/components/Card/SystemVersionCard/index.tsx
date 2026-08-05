@@ -44,12 +44,12 @@ export default function SystemVersionCard({
                     height: 50,
                     borderRadius: "20%",
                     background:
-                        "linear-gradient(135deg, #6C7CF5 0%, #8FA6FF 100%)",
+                        "linear-gradient(135deg, #E42431 0%, #8FA6FF 100%)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     marginBottom: 12,
-                    marginLeft:-2,
+                    marginLeft: -2,
                     padding: 10,
                 }}
             >

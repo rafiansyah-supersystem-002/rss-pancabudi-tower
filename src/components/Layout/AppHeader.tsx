@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Layout, Avatar, Dropdown, Typography, Grid, Button } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 
-
 const { Header } = Layout;
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -63,7 +62,7 @@ export default function AppHeader({
             user.roles
                 ?.map(
                     (role: string) =>
-                        role.charAt(0).toUpperCase() + role.slice(1)
+                        role.charAt(0).toUpperCase() + role.slice(1),
                 )
                 .join(", ") || ""
         );
@@ -71,7 +70,6 @@ export default function AppHeader({
 
     const screens = useBreakpoint();
     const isMobile = screens.xs;
-
 
     return (
         <div
@@ -104,14 +102,14 @@ export default function AppHeader({
                         gap: 2,
                     }}
                 >
-                    <span style={{ fontSize: "20px", color: "#6C7CF5" }}>
+                    <span style={{ fontSize: "20px", color: "#E42431" }}>
                         {currentPageIcon}
                     </span>
                     <Title
                         level={screens.xs ? 5 : 4}
                         style={{
                             margin: 0,
-                            color: "#6C7CF5",
+                            color: "#E42431",
                             textTransform: "capitalize",
                             fontSize: screens.xs ? "13px" : "18px",
                             lineHeight: screens.xs ? "20px" : "26px",
@@ -129,219 +127,202 @@ export default function AppHeader({
                         gap: 12,
                     }}
                 >
-                      <Dropdown
-                            placement="bottomRight"
-                            menu={{
-                                items: [
-                                    {
-                                        type: "group",
-                                        label: (
+                    <Dropdown
+                        placement="bottomRight"
+                        menu={{
+                            items: [
+                                {
+                                    type: "group",
+                                    label: (
+                                        <div
+                                            style={{
+                                                padding: isMobile
+                                                    ? "4px 0px"
+                                                    : "8px 0px",
+                                            }}
+                                        >
                                             <div
                                                 style={{
-                                                    padding: isMobile
-                                                        ? "4px 0px"
-                                                        : "8px 0px",
+                                                    display: "flex",
+                                                    flexDirection: "row",
+                                                    gap: 6,
                                                 }}
                                             >
+                                                <Avatar
+                                                    size={isMobile ? 28 : 36}
+                                                    src={`/assets/images/avatar/${userAvatar}.png`}
+                                                    style={{
+                                                        fontSize: isMobile
+                                                            ? 16
+                                                            : 22,
+                                                        textAlign: "center",
+                                                    }}
+                                                >
+                                                    {/* Fallback in case image doesn't load */}
+                                                    {userInitial !== "?" ? (
+                                                        userInitial
+                                                    ) : (
+                                                        <UserOutlined />
+                                                    )}
+                                                </Avatar>
+
                                                 <div
                                                     style={{
                                                         display: "flex",
-                                                        flexDirection: "row",
-                                                        gap: 6,
+                                                        flexDirection: "column",
+                                                        justifyContent:
+                                                            "center",
+                                                        lineHeight: 1.2,
                                                     }}
                                                 >
-                                                    <Avatar
-                                                        size={
-                                                            isMobile ? 28 : 36
-                                                        }
-                                                        src={`/assets/images/avatar/${userAvatar}.png`}
+                                                    <Text
                                                         style={{
                                                             fontSize: isMobile
-                                                                ? 16
-                                                                : 22,
-                                                            textAlign: "center",
-                                                        }}
-                                                    >
-                                                        {/* Fallback in case image doesn't load */}
-                                                        {userInitial !== "?" ? (
-                                                            userInitial
-                                                        ) : (
-                                                            <UserOutlined />
-                                                        )}
-                                                    </Avatar>
-
-                                                    <div
-                                                        style={{
-                                                            display: "flex",
-                                                            flexDirection:
-                                                                "column",
-                                                            justifyContent:
-                                                                "center",
+                                                                ? "8px"
+                                                                : "12px",
+                                                            fontWeight: 600,
+                                                            margin: 0,
                                                             lineHeight: 1.2,
+                                                            display: "block",
+                                                            opacity: 0.7,
                                                         }}
                                                     >
-                                                        <Text
-                                                            style={{
-                                                                fontSize:
-                                                                    isMobile
-                                                                        ? "8px"
-                                                                        : "12px",
-                                                                fontWeight: 600,
-                                                                margin: 0,
-                                                                lineHeight: 1.2,
-                                                                display:
-                                                                    "block",
-                                                                opacity: 0.7,
-                                                            }}
-                                                        >
-                                                            {userDisplayName}
-                                                        </Text>
-                                                        <Text
-                                                            style={{
-                                                                fontSize:
-                                                                    isMobile
-                                                                        ? "8px"
-                                                                        : "10px",
-                                                                fontWeight: 400,
-                                                                lineHeight: 1.2,
-                                                                display:
-                                                                    "block",
-                                                                opacity: 0.7,
-                                                            }}
-                                                        >
-                                                            {userEmail}
-                                                        </Text>
-                                                        <Text
-                                                            style={{
-                                                                fontSize:
-                                                                    isMobile
-                                                                        ? "8px"
-                                                                        : "10px",
-                                                                fontWeight: 400,
-                                                                lineHeight: 1.2,
-                                                                display:
-                                                                    "block",
-                                                                opacity: 0.7,
-                                                            }}
-                                                        >
-                                                            {userPhone}
-                                                        </Text>
-                                                    </div>
+                                                        {userDisplayName}
+                                                    </Text>
+                                                    <Text
+                                                        style={{
+                                                            fontSize: isMobile
+                                                                ? "8px"
+                                                                : "10px",
+                                                            fontWeight: 400,
+                                                            lineHeight: 1.2,
+                                                            display: "block",
+                                                            opacity: 0.7,
+                                                        }}
+                                                    >
+                                                        {userEmail}
+                                                    </Text>
+                                                    <Text
+                                                        style={{
+                                                            fontSize: isMobile
+                                                                ? "8px"
+                                                                : "10px",
+                                                            fontWeight: 400,
+                                                            lineHeight: 1.2,
+                                                            display: "block",
+                                                            opacity: 0.7,
+                                                        }}
+                                                    >
+                                                        {userPhone}
+                                                    </Text>
                                                 </div>
                                             </div>
-                                        ),
-                                    },
+                                        </div>
+                                    ),
+                                },
 
-                                    { type: "divider" },
+                                { type: "divider" },
 
-                                    {
-                                        key: "profile",
-                                        label: (
-                                            <a
-                                                onClick={() =>
-                                                    router.push("/profile")
-                                                }
-                                                style={{
-                                                    fontSize: isMobile
-                                                        ? 12
-                                                        : 14,
-                                                    padding: 0,
-                                                }}
-                                            >
-                                                Profile
-                                            </a>
-                                        ),
-                                    },
-                                      {
-                                        key: "about",
-                                        label: (
-                                            <a
-                                                onClick={() =>
-                                                    router.push("/public/about")
-                                                }
-                                                style={{
-                                                    fontSize: isMobile
-                                                        ? 12
-                                                        : 14,
-                                                    padding: 0,
-                                                }}
-                                            >
-                                                About
-                                            </a>
-                                        ),
-                                    },
-                              
-                                    { type: "divider" },
+                                {
+                                    key: "profile",
+                                    label: (
+                                        <a
+                                            onClick={() =>
+                                                router.push("/profile")
+                                            }
+                                            style={{
+                                                fontSize: isMobile ? 12 : 14,
+                                                padding: 0,
+                                            }}
+                                        >
+                                            Profile
+                                        </a>
+                                    ),
+                                },
+                                {
+                                    key: "about",
+                                    label: (
+                                        <a
+                                            onClick={() =>
+                                                router.push("/public/about")
+                                            }
+                                            style={{
+                                                fontSize: isMobile ? 12 : 14,
+                                                padding: 0,
+                                            }}
+                                        >
+                                            About
+                                        </a>
+                                    ),
+                                },
 
-                                   
-                                ],
+                                { type: "divider" },
+                            ],
+                        }}
+                    >
+                        <Button
+                            type="text"
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: isMobile ? 4 : 8,
+                                padding: 0,
+                                cursor: "pointer",
+                            }}
+                            onClick={() => {
+                                // your click handler here
+                                console.log("Avatar button clicked");
                             }}
                         >
-                            <Button
-                                type="text"
+                            <Avatar
+                                size={isMobile ? 28 : 36}
+                                src={`/assets/images/avatar/${userAvatar}.png`}
                                 style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: isMobile ? 4 : 8,
-                                    padding: 0,
-                                    cursor: "pointer",
-                                }}
-                                onClick={() => {
-                                    // your click handler here
-                                    console.log("Avatar button clicked");
+                                    fontSize: isMobile ? 16 : 22,
+                                    textAlign: "center",
                                 }}
                             >
-                                <Avatar
-                                    size={isMobile ? 28 : 36}
-                                    src={`/assets/images/avatar/${userAvatar}.png`}
-                                    style={{
-                                        fontSize: isMobile ? 16 : 22,
-                                        textAlign: "center",
-                                    }}
-                                >
-                                    {userInitial !== "?" ? (
-                                        userInitial
-                                    ) : (
-                                        <UserOutlined />
-                                    )}
-                                </Avatar>
+                                {userInitial !== "?" ? (
+                                    userInitial
+                                ) : (
+                                    <UserOutlined />
+                                )}
+                            </Avatar>
 
-                                <div
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    textAlign: "left",
+                                    lineHeight: 1.2,
+                                }}
+                            >
+                                <Text
                                     style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        textAlign: "left",
+                                        fontSize: isMobile ? "10px" : "14px",
+                                        fontWeight: 600,
+                                        margin: 0,
                                         lineHeight: 1.2,
                                     }}
                                 >
-                                    <Text
-                                        style={{
-                                            fontSize: isMobile
-                                                ? "10px"
-                                                : "14px",
-                                            fontWeight: 600,
-                                            margin: 0,
-                                            lineHeight: 1.2,
-                                        }}
-                                    >
-                                        {isMobile
-                                            ? userFirstNameOnly
-                                            : userDisplayName}
-                                    </Text>
+                                    {isMobile
+                                        ? userFirstNameOnly
+                                        : userDisplayName}
+                                </Text>
 
-                                    <Text
-                                        style={{
-                                            fontSize: isMobile ? "8px" : "12px",
-                                            fontWeight: 400,
-                                            lineHeight: 1.2,
-                                        }}
-                                    >
-                                        {userRolesDisplay}
-                                    </Text>
-                                </div>
-                            </Button>
-                        </Dropdown>
+                                <Text
+                                    style={{
+                                        fontSize: isMobile ? "8px" : "12px",
+                                        fontWeight: 400,
+                                        lineHeight: 1.2,
+                                    }}
+                                >
+                                    {userRolesDisplay}
+                                </Text>
+                            </div>
+                        </Button>
+                    </Dropdown>
                 </div>
             </Header>
         </div>

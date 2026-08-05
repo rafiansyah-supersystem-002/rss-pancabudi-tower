@@ -162,10 +162,11 @@ export default function AppFooter({ isDark }: AppFooterProps) {
                                 textAlign: "left",
                             }}
                         >
-                            <span style={{ fontWeight: 500 }}>
-                                Panca Budi 
-                            </span>{" "}
-                            Tower App is an unofficial multi purpose web application designed to manage workflows and assisting internal company managements, featuring friendly and informative UI to deliver complicated data into understandable contents. 
+                            <span style={{ fontWeight: 500 }}>Panca Budi</span>{" "}
+                            Tower App is an unofficial web application that
+                            streamlines workflows and supports internal company
+                            operations through a user friendly interface and
+                            clear, accessible data.
                         </Text>
                     ) : (
                         <Text
@@ -178,16 +179,12 @@ export default function AppFooter({ isDark }: AppFooterProps) {
                             }}
                         >
                             <span style={{ fontWeight: 500 }}>
-                                Silverwood Technologies
+                               Panca Budi 
                             </span>{" "}
-                            Master App is an unofficial portfolio web
-                            application created by Mahesa Rafiansyah,
-                            integrating Rafiansyah Design and its custom-built
-                            projects. Each project under Rafiansyah Design is
-                            developed using modern, up-to-date React.js
-                            technologies—specifically Next.js—with a strong
-                            focus on performance, structure, and refined user
-                            experience.
+                              Tower App is an unofficial web application that
+                            streamlines workflows and supports internal company
+                            operations through a user friendly interface and
+                            clear, accessible data.
                         </Text>
                     )}
                 </div>
@@ -201,7 +198,7 @@ export default function AppFooter({ isDark }: AppFooterProps) {
                 }}
             >
                 <Text style={{ fontSize: isXs ? 10 : 14, color: mutedColor }}>
-                    © 2026 Rafiansyah Silverwood. All rights reserved.
+                    © 2026 Rafiansyah Supersystems. All rights reserved.
                 </Text>
             </div>
         </Footer>

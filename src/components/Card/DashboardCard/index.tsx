@@ -55,7 +55,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
                             transform: "translateY(-50%)",
                             fontSize: screens.xs ? 48 : 72,
                             opacity: 0.5,
-                            color: "#6C7CF5",
+                            color: "#E42431",
                             ...iconStyle,
                         },
                     })}

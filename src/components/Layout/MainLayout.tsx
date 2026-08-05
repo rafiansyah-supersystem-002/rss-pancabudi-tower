@@ -24,8 +24,11 @@ export default function MainLayout({ children, isDark, setIsDark }: Props) {
     const pathname = usePathname() || "/";
     const router = useRouter();
 const user = {
-  firstName: "Jerry",
-  lastName :"Tom"
+  firstName: "Panca Budi",
+  lastName :"",
+  roles:["Tower App"],
+    email: "Pancabudi Tower BSD City",
+        phoneNumber: "(021) 54365555"
 };
     const screens = useBreakpoint();
     const [collapsed, setCollapsed] = useState(false);

@@ -89,7 +89,7 @@ const FinanceNavCard = () => {
                                 cursor: "pointer",
                             }}
                             onClick={() => {
-                            window.location.href = item.path;
+                                window.location.href = item.path;
                             }}
                         >
                             <Button
@@ -98,7 +98,7 @@ const FinanceNavCard = () => {
                                 icon={item.icon}
                                 style={{
                                     background:
-                                        "linear-gradient(135deg, #6C7CF5 0%, #8FA6FF 100%)",
+                                        "linear-gradient(135deg, #E42431 0%, #8FA6FF 100%)",
                                     color: "#fff",
                                     border: "none",
                                 }}
