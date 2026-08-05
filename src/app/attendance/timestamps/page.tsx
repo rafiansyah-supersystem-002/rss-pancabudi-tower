@@ -19,6 +19,7 @@ import {
     Divider,
     DatePicker,
     Empty,
+    Alert,
 } from "antd";
 import {
     UploadOutlined,
@@ -27,6 +28,7 @@ import {
     LoginOutlined,
     UserOutlined,
     SearchOutlined,
+    ClockCircleOutlined,
 } from "@ant-design/icons";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import axios from "axios";
@@ -70,6 +72,7 @@ interface OfficeHours {
     maxStartHours: string;
     finishHours: string;
     maxFinishHours: string;
+    enforceStartHours: any;
 }
 
 export default function AttendancePage() {
@@ -186,30 +189,37 @@ export default function AttendancePage() {
                 return;
             }
 
-            const now = new Date();
-
-            // Office start time
-            const [startHour, startMinute] = office.startHours
-                .split(":")
-                .map(Number);
-            const startLimit = new Date();
-            startLimit.setHours(startHour, startMinute, 0, 0);
-
-            // Maximum allowed check-in time
-            const [maxHour, maxMinute] = office.maxStartHours
-                .split(":")
-                .map(Number);
-            const maxLimit = new Date();
-            maxLimit.setHours(maxHour, maxMinute, 0, 0);
+            const enforceStartHours =
+                String(office.enforceStartHours).trim().toLowerCase() ===
+                "true";
 
             let status: "Present" | "Late" | "Absent";
 
-            if (now <= startLimit) {
+            if (!enforceStartHours) {
+                // Time checking disabled
                 status = "Present";
-            } else if (now <= maxLimit) {
-                status = "Late";
             } else {
-                status = "Absent";
+                const now = new Date();
+
+                const [startHour, startMinute] = office.startHours
+                    .split(":")
+                    .map(Number);
+                const startLimit = new Date();
+                startLimit.setHours(startHour, startMinute, 0, 0);
+
+                const [maxHour, maxMinute] = office.maxStartHours
+                    .split(":")
+                    .map(Number);
+                const maxLimit = new Date();
+                maxLimit.setHours(maxHour, maxMinute, 0, 0);
+
+                if (now <= startLimit) {
+                    status = "Present";
+                } else if (now <= maxLimit) {
+                    status = "Late";
+                } else {
+                    status = "Absent";
+                }
             }
 
             // Step 2: Save attendance
@@ -454,11 +464,6 @@ export default function AttendancePage() {
                         ),
                         children: (
                             <>
-                                <Text>
-                                    {officeHours.length > 0
-                                        ? `${officeHours[0].startHours} - ${officeHours[0].finishHours}`
-                                        : "Loading..."}
-                                </Text>
                                 <Card
                                     title={
                                         <span
@@ -481,6 +486,39 @@ export default function AttendancePage() {
                                         orientation="vertical"
                                         style={{ width: "100%" }}
                                     >
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: 10,
+                                                padding: "10px 14px",
+                                                borderRadius: 12,
+                                                background: "#f0f9ff", // Light blue background
+                                                border: "1px solid #91caff", // Blue stroke
+                                                marginBottom: 16,
+                                            }}
+                                        >
+                                            <ClockCircleOutlined
+                                                style={{
+                                                    color: "#1677ff",
+                                                    fontSize: 18,
+                                                }}
+                                            />
+
+                                            <div>
+                                                <Text strong>Shift Hours</Text>
+                                                <br />
+                                                <Text type="secondary">
+                                                    {officeHours[0]
+                                                        ? officeHours[0]
+                                                              .enforceStartHours ===
+                                                          "FALSE"
+                                                            ? "Time checking feature is disabled."
+                                                            : `${officeHours[0].startHours} - ${officeHours[0].finishHours}`
+                                                        : "Loading..."}
+                                                </Text>
+                                            </div>
+                                        </div>
                                         <Select
                                             style={{ width: "100%" }}
                                             placeholder="Select Security"
@@ -801,7 +839,7 @@ export default function AttendancePage() {
                                                                         </Typography.Text>
 
                                                                         <Space
-                                                                            direction="vertical"
+                                                                            orientation="vertical"
                                                                             style={{
                                                                                 width: "100%",
                                                                                 marginTop: 0,

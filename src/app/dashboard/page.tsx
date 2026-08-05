@@ -11,6 +11,7 @@ import {
     Grid,
     Tag,
     Typography,
+    Carousel,
 } from "antd";
 import {
     ArrowUpOutlined,
@@ -36,6 +37,7 @@ import {
 import { GradualSpacing } from "@/components/Typography/Animations/GradualSpacing";
 import { StaggeredFade } from "@/components/Typography/Animations/StaggeredFade";
 import Image from "next/image";
+import Link from "next/link";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -53,19 +55,6 @@ interface DashboardData {
 const MainLayout: React.FC = () => {
     // Sample data for the table
     const screens = useBreakpoint();
-    const firstName = "Mahesa";
-    const lastName = "Mahesa";
-
-    const greetingText = useMemo(() => {
-        const pick =
-            GREETINGS_HEADLINE[
-                Math.floor(Math.random() * GREETINGS_HEADLINE.length)
-            ];
-
-        return `${pick},${firstName ? ` ${firstName}` : ""}!`;
-    }, [firstName]);
-
-    const subtitleText = GREETINGS_SUBTITLE[0];
 
     const fadeUp: Variants = {
         hidden: {
@@ -85,87 +74,102 @@ const MainLayout: React.FC = () => {
         }),
     };
 
+    const images = [
+        "/assets/images/dashboard/csl001.png",
+        "/assets/images/dashboard/csl002.png",
+        "/assets/images/dashboard/csl003.png",
+    ];
+
     return (
         <>
-            <div
-                style={{
-                    padding: "4px 10px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                }}
-            >
-                <Title
-                    style={{
-                        color: "#787878",
-                        fontSize: screens.xs ? 12 : 14,
-                        fontWeight: 500,
-                        margin: 0,
-                    }}
-                >
-                    Integrated Modules
-                </Title>
+            <motion.div variants={fadeUp} initial="hidden" animate="show">
                 <div
                     style={{
-                        flex: 1, // line fills remaining space
-                        height: "1px", // line thickness
-                        backgroundColor: "#d9d9d9", // line color
+                        width: "100%",
+                        maxWidth: screens.xs ? 320 : "100%",
+                        margin: "0 auto",
+                        borderRadius: screens.xs ? 12 : 16,
+                        overflow: "hidden",
                     }}
-                />
-            </div>
+                >
+                    <Carousel autoplay>
+                        {images.map((src, index) => (
+                            <div key={index}>
+                                <Image
+                                    src={src}
+                                    alt="Carousel Image"
+                                    width={screens.xs ? 320 : 900}
+                                    height={screens.xs ? 180 : 500}
+                                    style={{
+                                        width: "100%",
+                                        height: screens.xs ? "180px" : "300px",
+                                        objectFit: "cover",
+                                    }}
+                                />
+                            </div>
+                        ))}
+                    </Carousel>
+                </div>
+                <div
+                    style={{
+                        marginTop: 10,
+                        padding: "6px 4px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                    }}
+                >
+                    <Title
+                        style={{
+                            color: "#787878",
+                            fontSize: screens.xs ? 12 : 14,
+                            fontWeight: 500,
+                            margin: 0,
+                        }}
+                    >
+                        Applications
+                    </Title>
+                    <div
+                        style={{
+                            flex: 1, // line fills remaining space
+                            height: "1px", // line thickness
+                            backgroundColor: "#d9d9d9", // line color
+                        }}
+                    />
+                </div>
 
-            <motion.div variants={fadeUp} initial="hidden" animate="show">
-                {" "}
-                <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+                <Row
+                    gutter={[12, 12]}
+                    style={{ marginTop: 0, marginBottom: 16 }}
+                >
                     <Col xs={12} md={6}>
-                        <DashboardCard
-                            title="Security"
-                            subtitle="PB Tower"
-                            status="ONLINE"
-                            statusColor="green"
-                            icon={<IdcardOutlined />}
-                        />
+                        <Link
+                            href="/attendance/timestamps"
+                            style={{
+                                display: "block",
+                                textDecoration: "none",
+                            }}
+                        >
+                            <DashboardCard
+                                title="Security"
+                                subtitle="PB Tower"
+                                status="ONLINE"
+                                statusColor="green"
+                                icon={<IdcardOutlined />}
+                            />
+                        </Link>
                     </Col>
-                    <Col xs={12} md={6}>
+                    {/* <Col xs={12} md={6}>
                         <DashboardCard
-                            title="Chambers"
-                            subtitle="Rafiansyah"
+                            title="Upcoming"
+                            subtitle="PB Tower"
                             status="ONLINE"
                             statusColor="green"
                             icon={<LockOutlined />}
                         />
-                    </Col>
-                    <Col xs={12} md={6}>
-                        <DashboardCard
-                            title="Moneypulate"
-                            subtitle="Rafiansyah"
-                            status="ONLINE"
-                            statusColor="green"
-                            icon={<DollarOutlined />}
-                        />
-                    </Col>
-                    <Col xs={12} md={6}>
-                        <DashboardCard
-                            title="Gallery"
-                            subtitle="Rafiansyah"
-                            status="OFFLINE"
-                            statusColor="red"
-                            icon={<DeploymentUnitOutlined />}
-                        />
-                    </Col>
-                    <Col xs={12} md={6}>
-                        <DashboardCard
-                            title="Lenscore"
-                            subtitle="Rafiansyah"
-                            status="ONLINE"
-                            statusColor="green"
-                            icon={<ScanOutlined />}
-                        />
-                    </Col>
+                    </Col> */}
                 </Row>
             </motion.div>
-
-           
         </>
     );
 };

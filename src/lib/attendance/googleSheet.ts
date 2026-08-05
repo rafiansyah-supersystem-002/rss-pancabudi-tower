@@ -329,7 +329,7 @@ export async function getVisits() {
 export async function getOfficeHours() {
     const res = await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
-        range: `${OFFICEHOURS_SHEET}!A2:D`,
+        range: `${OFFICEHOURS_SHEET}!A2:E`,
     });
 
     const rows = res.data.values ?? [];
@@ -339,5 +339,6 @@ export async function getOfficeHours() {
         maxStartHours: row[1] ?? "",
         finishHours: row[2] ?? "",
         maxFinishHours: row[3] ?? "",
+        enforceStartHours: row[4] ?? "",
     }));
 }
