@@ -86,7 +86,7 @@ const MainLayout: React.FC = () => {
                 <div
                     style={{
                         width: "100%",
-                        maxWidth: screens.xs ? 320 : "100%",
+                        maxWidth: "100%",
                         margin: "0 auto",
                         borderRadius: screens.xs ? 12 : 16,
                         overflow: "hidden",
